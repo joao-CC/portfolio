@@ -10,7 +10,7 @@ O microsserviço de notificação é um **projeto Django separado** (porta **800
 em **outro repositório**. Os dois precisam estar rodando ao mesmo tempo para o
 sino funcionar.
 
-> Repositório do microsserviço: `COLOQUE_AQUI_O_LINK_DO_SEU_REPO_NOTIFICACAO_MS`
+> Repositório do microsserviço: `https://github.com/joao-CC/portfolio.git`
 
 ---
 
@@ -41,7 +41,7 @@ Projetos/
 
 ```bash
 cd ~/Projetos
-git clone COLOQUE_AQUI_O_LINK_DO_SEU_REPO_PORTFOLIO portfolio
+git clone https://github.com/joao-CC/portfolio.git portfolio
 cd portfolio
 ```
 
@@ -104,7 +104,7 @@ Acesse: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 ```bash
 cd ~/Projetos
-git clone COLOQUE_AQUI_O_LINK_DO_SEU_REPO_NOTIFICACAO_MS notificacao_ms
+git clone https://github.com/joao-CC/portfolio.git notificacao_ms
 cd notificacao_ms
 ```
 
