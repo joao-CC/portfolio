@@ -1,0 +1,412 @@
+{% extends "core/base.html" %}
+
+{% block title %}Início - {{ perfil.nome|default:"Meu Portfólio" }}{% endblock %}
+
+{% block header_title %}{{ perfil.nome|default:"Portfólio do Aluno" }}{% endblock %}
+
+{% block extra_css %}
+.perfil {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.perfil img {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #2c3e50;
+    margin-bottom: 15px;
+}
+.perfil h2 {
+    margin-bottom: 5px;
+}
+.perfil p {
+    color: #666;
+}
+.secao {
+    background: white;
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.secao h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 8px;
+}
+.secao ul {
+    list-style: none;
+    padding: 0;
+}
+.secao ul li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+.secao ul li:last-child {
+    border-bottom: none;
+}
+.aviso {
+    color: #888;
+    font-style: italic;
+}
+.aviso a {
+    color: #3498db;
+}
+{% endblock %}
+
+{% block content %}
+
+{% if perfil %}
+    <div class="perfil">
+        {% if perfil.url_imagem %}
+            <img src="{{ perfil.url_imagem }}" alt="Foto de {{ perfil.nome }}">
+        {% else %}
+            <img src="https://via.placeholder.com/180" alt="Foto do Aluno">
+        {% endif %}
+        <h2>{{ perfil.nome }}</h2>
+        <p>Estudante de {{ perfil.curso }} - UAST/UFRPE</p>
+    </div>
+
+    <div class="secao">
+        <h3>Sobre Mim</h3>
+        <p>{{ perfil.descricao }}</p>
+    </div>
+
+    <div class="secao">
+        <h3>Dados Pessoais</h3>
+        <ul>
+            <li><strong>Nome:</strong> {{ perfil.nome }}</li>
+            <li><strong>Curso:</strong> {{ perfil.curso }}</li>
+            <li><strong>Período:</strong> {{ perfil.periodo }}º</li>
+            <li><strong>E-mail:</strong> {{ perfil.email }}</li>
+            <li><strong>GitHub:</strong> {{ perfil.github }}</li>
+            <li><strong>LinkedIn:</strong> {{ perfil.linkedin }}</li>
+        </ul>
+    </div>
+
+{% else %}
+    <div class="secao">
+        <h3>Perfil não cadastrado</h3>
+        <p class="aviso">
+            Acesse o <a href="/admin/">painel admin</a> e cadastre seus dados
+            em <strong>Core → Banco Pessoals</strong>.
+        </p>
+    </div>
+{% endif %}
+
+<div class="secao">
+    <h3>Cursos e Certificados</h3>
+    <ul>
+        {% for cert in certificados %}
+            <li>{{ cert.descricao }}</li>
+        {% empty %}
+            <li class="aviso">
+                Nenhum certificado cadastrado ainda.
+                Adicione pelo <a href="/admin/">admin</a> em <strong>Portfolio → Certificados</strong>.
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- Botao Editar Perfil -->
+<div style="text-align: center; margin: 30px 0;">
+    <button id="btn-editar" style="
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        font-size: 1.1em;
+        border-radius: 5px;
+        cursor: pointer;
+    ">Editar Perfil</button>
+</div>
+
+<!-- Modal de Login -->
+<div id="modal-login" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+">
+    <div style="
+        background: white;
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 30px;
+        border-radius: 8px;
+    ">
+        <h3 style="margin-bottom: 20px; color: #2c3e50;">Login para Editar</h3>
+        <div style="margin-bottom: 15px;">
+            <label>Username:</label><br>
+            <input type="text" id="login-username" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label>Password:</label><br>
+            <input type="password" id="login-password" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+        <p id="login-erro" style="color: red; display: none;"></p>
+        <button id="btn-login" style="
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+        ">Entrar</button>
+        <button id="btn-cancelar-login" style="
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        ">Cancelar</button>
+    </div>
+</div>
+
+<!-- Modal de Edicao do Perfil -->
+<div id="modal-editar" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    overflow-y: auto;
+">
+    <div style="
+        background: white;
+        max-width: 500px;
+        margin: 50px auto;
+        padding: 30px;
+        border-radius: 8px;
+    ">
+        <h3 style="margin-bottom: 20px; color: #2c3e50;">Editar Perfil</h3>
+
+        <div style="margin-bottom: 12px;">
+            <label>Nome:</label><br>
+            <input type="text" id="edit-nome" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label>Descrição:</label><br>
+            <textarea id="edit-descricao" rows="3" style="width: 100%; padding: 8px; margin-top: 5px;"></textarea>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label>Curso:</label><br>
+            <input type="text" id="edit-curso" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label>Período:</label><br>
+            <input type="text" id="edit-periodo" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label>E-mail:</label><br>
+            <input type="email" id="edit-email" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label>GitHub:</label><br>
+            <input type="text" id="edit-github" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label>LinkedIn:</label><br>
+            <input type="text" id="edit-linkedin" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label>URL da Imagem:</label><br>
+            <input type="url" id="edit-url_imagem" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+
+        <p id="edit-sucesso" style="color: green; display: none;">Perfil atualizado!</p>
+        <p id="edit-erro" style="color: red; display: none;"></p>
+
+        <button id="btn-salvar" style="
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+        ">Salvar</button>
+        <button id="btn-cancelar-editar" style="
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        ">Cancelar</button>
+    </div>
+</div>
+
+<script>
+// ─── Elementos do DOM ───
+
+const btnEditar = document.getElementById('btn-editar');
+const modalLogin = document.getElementById('modal-login');
+const modalEditar = document.getElementById('modal-editar');
+
+const btnLogin = document.getElementById('btn-login');
+const btnCancelarLogin = document.getElementById('btn-cancelar-login');
+const btnSalvar = document.getElementById('btn-salvar');
+const btnCancelarEditar = document.getElementById('btn-cancelar-editar');
+
+const loginErro = document.getElementById('login-erro');
+const editSucesso = document.getElementById('edit-sucesso');
+const editErro = document.getElementById('edit-erro');
+
+// URL base da API (mesmo servidor do portfolio, porta 8000)
+const API_BASE = '';
+
+// ─── Passo 1: Clicar em "Editar" ───
+
+btnEditar.addEventListener('click', function() {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+        carregarPerfil(token);
+    } else {
+        modalLogin.style.display = 'block';
+    }
+});
+
+// ─── Passo 2: Fazer Login (obter JWT) ───
+
+btnLogin.addEventListener('click', function() {
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+
+    loginErro.style.display = 'none';
+
+    fetch(API_BASE + '/api/token/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, password: password }),
+    })
+    .then(function(response) {
+        if (!response.ok) {
+            throw new Error('Username ou senha incorretos');
+        }
+        return response.json();
+    })
+    .then(function(data) {
+        localStorage.setItem('access_token', data.access);
+        localStorage.setItem('refresh_token', data.refresh);
+
+        modalLogin.style.display = 'none';
+
+        carregarPerfil(data.access);
+    })
+    .catch(function(erro) {
+        loginErro.textContent = erro.message;
+        loginErro.style.display = 'block';
+    });
+});
+
+// ─── Passo 3: Carregar dados do perfil (GET /api/perfil/) ───
+
+function carregarPerfil(token) {
+    fetch(API_BASE + '/api/perfil/', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + token },
+    })
+    .then(function(response) {
+        if (!response.ok) {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            modalLogin.style.display = 'block';
+            throw new Error('Token expirado. Faca login novamente.');
+        }
+        return response.json();
+    })
+    .then(function(perfil) {
+        document.getElementById('edit-nome').value = perfil.nome || '';
+        document.getElementById('edit-descricao').value = perfil.descricao || '';
+        document.getElementById('edit-curso').value = perfil.curso || '';
+        document.getElementById('edit-periodo').value = perfil.periodo || '';
+        document.getElementById('edit-email').value = perfil.email || '';
+        document.getElementById('edit-github').value = perfil.github || '';
+        document.getElementById('edit-linkedin').value = perfil.linkedin || '';
+        document.getElementById('edit-url_imagem').value = perfil.url_imagem || '';
+
+        editSucesso.style.display = 'none';
+        editErro.style.display = 'none';
+        modalEditar.style.display = 'block';
+    })
+    .catch(function(erro) {
+        console.error(erro);
+    });
+}
+
+// ─── Passo 4: Salvar alteracoes (PUT /api/perfil/) ───
+
+btnSalvar.addEventListener('click', function() {
+    const token = localStorage.getItem('access_token');
+
+    const dados = {
+        nome: document.getElementById('edit-nome').value,
+        descricao: document.getElementById('edit-descricao').value,
+        curso: document.getElementById('edit-curso').value,
+        periodo: document.getElementById('edit-periodo').value,
+        email: document.getElementById('edit-email').value,
+        github: document.getElementById('edit-github').value,
+        linkedin: document.getElementById('edit-linkedin').value,
+        url_imagem: document.getElementById('edit-url_imagem').value,
+    };
+
+    fetch(API_BASE + '/api/perfil/', {
+        method: 'PUT',
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dados),
+    })
+    .then(function(response) {
+        if (!response.ok) {
+            return response.json().then(function(erros) {
+                throw new Error(JSON.stringify(erros));
+            });
+        }
+        return response.json();
+    })
+    .then(function(perfil) {
+        editSucesso.style.display = 'block';
+        editErro.style.display = 'none';
+
+        // Recarrega a pagina apos 1s para que o conteudo renderizado
+        // pelo Django (server-side) tambem fique atualizado.
+        setTimeout(function() {
+            location.reload();
+        }, 1000);
+    })
+    .catch(function(erro) {
+        editErro.textContent = 'Erro ao salvar: ' + erro.message;
+        editErro.style.display = 'block';
+        editSucesso.style.display = 'none';
+    });
+});
+
+// ─── Botoes de cancelar ───
+
+btnCancelarLogin.addEventListener('click', function() {
+    modalLogin.style.display = 'none';
+});
+
+btnCancelarEditar.addEventListener('click', function() {
+    modalEditar.style.display = 'none';
+});
+</script>
+
+{% endblock %}

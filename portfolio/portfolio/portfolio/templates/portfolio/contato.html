@@ -1,0 +1,93 @@
+{% extends "core/base.html" %}
+
+{% block title %}Contato - Meu Portfólio{% endblock %}
+
+{% block header_title %}Entre em Contato{% endblock %}
+
+{% block extra_css %}
+.contato-card {
+    background: white;
+    padding: 30px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.contato-card h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 8px;
+}
+.contato-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 1em;
+}
+.contato-item:last-child {
+    border-bottom: none;
+}
+.contato-item strong {
+    min-width: 100px;
+    color: #2c3e50;
+}
+.contato-item a {
+    color: #3498db;
+    text-decoration: none;
+}
+.contato-item a:hover {
+    text-decoration: underline;
+}
+.aviso {
+    color: #888;
+    font-style: italic;
+}
+.aviso a {
+    color: #3498db;
+}
+{% endblock %}
+
+{% block content %}
+
+<div class="contato-card">
+    <h3>Informações de Contato</h3>
+
+    {% if perfil %}
+        {% if perfil.email %}
+            <div class="contato-item">
+                <strong>E-mail:</strong>
+                <a href="mailto:{{ perfil.email }}">{{ perfil.email }}</a>
+            </div>
+        {% endif %}
+
+        {% if perfil.github %}
+            <div class="contato-item">
+                <strong>GitHub:</strong>
+                <a href="https://{{ perfil.github }}" target="_blank">{{ perfil.github }}</a>
+            </div>
+        {% endif %}
+
+        {% if perfil.linkedin %}
+            <div class="contato-item">
+                <strong>LinkedIn:</strong>
+                <a href="https://{{ perfil.linkedin }}" target="_blank">{{ perfil.linkedin }}</a>
+            </div>
+        {% endif %}
+
+        {% if not perfil.email and not perfil.github and not perfil.linkedin %}
+            <p class="aviso">
+                Nenhuma informação de contato cadastrada.
+                Preencha e-mail, GitHub e LinkedIn pelo <a href="/admin/">admin</a>.
+            </p>
+        {% endif %}
+
+    {% else %}
+        <p class="aviso">
+            Perfil não encontrado. Cadastre seus dados pelo
+            <a href="/admin/">admin</a> em <strong>Core → Banco Pessoals</strong>.
+        </p>
+    {% endif %}
+</div>
+
+{% endblock %}

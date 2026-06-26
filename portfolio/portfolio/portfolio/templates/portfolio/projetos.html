@@ -1,0 +1,72 @@
+{% extends "core/base.html" %}
+
+{% block title %}Projetos - Meu Portfólio{% endblock %}
+
+{% block header_title %}Meus Projetos{% endblock %}
+
+{% block extra_css %}
+.projeto-card {
+    background: white;
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 4px solid #3498db;
+}
+.projeto-card h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+.projeto-card p {
+    color: #555;
+    margin-bottom: 10px;
+}
+.projeto-card .tipo {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    color: white;
+    margin-bottom: 10px;
+}
+.tipo-Pessoal {
+    background-color: #27ae60;
+}
+.tipo-Disciplina {
+    background-color: #e67e22;
+}
+.projeto-card a {
+    color: #3498db;
+    text-decoration: none;
+}
+.projeto-card a:hover {
+    text-decoration: underline;
+}
+.sem-projetos {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+    color: #666;
+}
+{% endblock %}
+
+{% block content %}
+
+{% for proj in projetos %}
+<div class="projeto-card">
+    <span class="tipo tipo-{{ proj.tipo }}">{{ proj.tipo }}</span>
+    <h3>{{ proj.nome }}</h3>
+    <p>{{ proj.descricao }}</p>
+    {% if proj.link_github %}
+        <a href="{{ proj.link_github }}" target="_blank">Ver no GitHub</a>
+    {% endif %}
+</div>
+{% empty %}
+<div class="sem-projetos">
+    <p>Nenhum projeto cadastrado ainda. Adicione pelo <a href="/admin/">admin</a>.</p>
+</div>
+{% endfor %}
+
+{% endblock %}
